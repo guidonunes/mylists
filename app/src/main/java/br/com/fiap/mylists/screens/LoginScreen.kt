@@ -1,6 +1,6 @@
 package br.com.fiap.mylists.screens
 
-package br.com.fiap.mylists.screens
+
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -64,13 +64,13 @@ fun LoginScreen(
                     .padding(16.dp)
             )
             Image(
-                painter = painterResource(id = R.drawable.schedule),
+                painter = painterResource(id = R.drawable.layers),
                 contentDescription = "Logo"
             )
         }
         Spacer(modifier = modifier.height(48.dp))
         Text(
-            text = "Autenticação",
+            text = "Authentication",
             fontSize = 28.sp
         )
         Spacer(modifier = modifier.height(16.dp))
