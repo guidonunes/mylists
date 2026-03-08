@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1044037728397",
+    "project_id": "mylists-fiap",
+    "storage_bucket": "mylists-fiap.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1044037728397:android:bf43148531b57ae4650ac4",
+        "android_client_info": {
+          "package_name": "br.com.fiap.mylists"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJfQss7qbz5_8ZHbihhRzpJo0izl8qg4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
