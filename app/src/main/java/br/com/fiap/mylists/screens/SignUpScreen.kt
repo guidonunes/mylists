@@ -148,7 +148,9 @@ fun SignupScreen(
         }
         Spacer(modifier = modifier.height(8.dp))
         TextButton(
-            onClick = {}
+            onClick = {
+                navController.navigate("login")
+            }
         ) {
             Text("Already have an account? Enter")
         }
