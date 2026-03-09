@@ -2,6 +2,7 @@ package br.com.fiap.mylists.screens
 
 
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,8 +10,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -22,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,6 +37,9 @@ import br.com.fiap.mylists.R
 import br.com.fiap.mylists.ui.theme.MylistsTheme
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 
 @Composable
 fun SignupScreen(
@@ -45,6 +52,12 @@ fun SignupScreen(
     }
     var password by remember {
         mutableStateOf("")
+    }
+
+    val authenticate = FirebaseAuth.getInstance()
+    val context = LocalContext.current
+    var isLoading by remember {
+        mutableStateOf(false)
     }
 
     Column(
@@ -99,9 +112,39 @@ fun SignupScreen(
         )
         Spacer(modifier = modifier.height(16.dp))
         Button(
-            onClick = {}
+            onClick = {
+                if (email.isNotEmpty() && password.isNotEmpty()) {
+                    isLoading = true
+
+                    authenticate.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            isLoading = false
+                            if (task.isSuccessful) {
+                                Toast.makeText(
+                                    context,
+                                    "Account created successfully",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "An error has occurred!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                }
+            }
         ) {
-            Text(text = "Create Account")
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    )
+            } else {
+                Text(text = "Create Account")
+            }
+
         }
         Spacer(modifier = modifier.height(8.dp))
         TextButton(
