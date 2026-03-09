@@ -57,6 +57,10 @@ fun LoginScreen(
         mutableStateOf(false)
     }
 
+    if(authenticate.currentUser != null) {
+        navController.navigate("home")
+    }
+
 
     Column(
         modifier = modifier.fillMaxSize(),
