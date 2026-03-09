@@ -11,7 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import br.com.fiap.mylists.screens.HomeScreen
+import br.com.fiap.mylists.screens.LoginScreen
 import br.com.fiap.mylists.screens.SignupScreen
 import br.com.fiap.mylists.ui.theme.MylistsTheme
 
@@ -21,7 +25,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MylistsTheme {
-                SignupScreen(Modifier, rememberNavController())
+                val navController = rememberNavController()
+                NavHost(
+                    navController = navController,
+                    startDestination = "login"
+                ) {
+                    composable ("login") {
+                        LoginScreen(navController = navController)
+                    }
+                    composable ("signup") {
+                        SignupScreen(navController = navController)
+                    }
+                    composable ("home") {
+                        HomeScreen(navController = navController)
+                    }
+                }
             }
         }
     }
