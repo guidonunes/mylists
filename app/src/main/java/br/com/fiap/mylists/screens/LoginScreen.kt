@@ -2,6 +2,7 @@ package br.com.fiap.mylists.screens
 
 
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,6 +35,7 @@ import br.com.fiap.mylists.R
 import br.com.fiap.mylists.ui.theme.MylistsTheme
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(
@@ -46,6 +49,14 @@ fun LoginScreen(
     var password by remember {
         mutableStateOf("")
     }
+
+    val authenticate = FirebaseAuth.getInstance()
+    val context = LocalContext.current
+
+    var isLoading by remember {
+        mutableStateOf(false)
+    }
+
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -99,7 +110,24 @@ fun LoginScreen(
         )
         Spacer(modifier = modifier.height(16.dp))
         Button(
-            onClick = {}
+            onClick = {
+                if (email.isNotEmpty() && password.isNotEmpty()) {
+                    authenticate.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            isLoading = false
+                            if (task.isSuccessful) {
+                                navController.navigate("home")
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "An error has occurred!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                            }
+                        }
+                }
+            }
         ) {
             Text(text = "Enter")
         }
