@@ -3,6 +3,8 @@ package br.com.fiap.mylists.screens
 
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,7 +37,11 @@ import br.com.fiap.mylists.R
 import br.com.fiap.mylists.ui.theme.MylistsTheme
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 
 @Composable
 fun LoginScreen(
@@ -60,6 +66,55 @@ fun LoginScreen(
     if(authenticate.currentUser != null) {
         navController.navigate("home")
     }
+
+    val auth = FirebaseAuth.getInstance()
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken(context.getString(R.string.default_web_client_id))
+        .requestEmail()
+        .build()
+    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+
+    val launcher = rememberLauncherForActivityResult (
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+
+        try {
+            // 3 - Obter a conta do Google, se o usuário logou com sucesso
+            val conta = task.getResult(ApiException::class.java)
+
+            // 4 - Obter o token da conta
+            val idToken = conta.idToken
+
+            if (idToken != null) {
+                // 5 - Trocar o token com o Firebase
+                val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+                auth.signInWithCredential(credential)
+                    .addOnCompleteListener { authTask ->
+                        if (authTask.isSuccessful) {
+                            val user = auth.currentUser
+                            navController.navigate("home")
+                            Toast.makeText(
+                                context, "Logged as ${user?.email}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Fail to log in ${authTask.exception?.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                    }
+            }
+
+        } catch (e: ApiException) {
+            Toast.makeText(context, "Fail to log in ${e.message}", Toast.LENGTH_SHORT)
+        }
+    }
+
 
 
     Column(
@@ -135,6 +190,16 @@ fun LoginScreen(
         ) {
             Text(text = "Enter")
         }
+
+        Spacer(modifier = modifier.height(8.dp))
+        Button(
+            onClick = {
+                launcher.launch(googleSignInClient.signInIntent)
+            }
+        ) {
+            Text(text = "Enter with Google")
+        }
+
         Spacer(modifier = modifier.height(8.dp))
         TextButton(
             onClick = {
