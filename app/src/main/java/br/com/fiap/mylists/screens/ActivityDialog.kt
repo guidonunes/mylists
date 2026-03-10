@@ -19,6 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import br.com.fiap.mylists.model.Activity
+import com.google.firebase.Firebase
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.database
 
 @Composable
 fun ActivityDialog(
@@ -94,6 +97,15 @@ fun ActivityDialog(
                         deadline = deadline,
                         done = done,
                     )
+
+                    val database = Firebase
+                        .database("https://mylists-fiap-default-rtdb.firebaseio.com/")
+                    val reference = database.getReference("activities").push()
+
+                    newActivity.id = reference.key.toString()
+
+                    reference.setValue(newActivity.toJson())
+
                     onConfirm()
                 }
             ) {
