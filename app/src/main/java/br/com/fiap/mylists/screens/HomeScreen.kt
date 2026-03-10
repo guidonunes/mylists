@@ -60,6 +60,9 @@ fun HomeScreen(
     var showDialogDelete by remember { mutableStateOf(false) }
     var idActivityToDelete by remember { mutableStateOf("") }
 
+    var showDialogEdit by remember { mutableStateOf(false) }
+    var idActivityToEdit by remember { mutableStateOf("") }
+
     var activities = remember { mutableStateListOf<Activity>() }
 
     val database = Firebase
@@ -183,7 +186,10 @@ fun HomeScreen(
                             )
                         }
                         IconButton(
-                            onClick = {}
+                            onClick = {
+                                showDialogEdit = true
+                                idActivityToEdit = it.id
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
@@ -251,7 +257,50 @@ fun HomeScreen(
             action = "Add"
         )
     }
+
+    if (showDialogEdit){
+        AlertDialog(
+            onDismissRequest = { showDialogEdit = false },
+            title = {
+                Text(
+                    text = "Edit activity"
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to update this activity?"
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialogEdit = false
+                    database.getReference("activities")
+                        .child(idActivityToEdit)
+                        .removeValue()
+                }) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDialogEdit = false
+                }) {
+                    Text(text = "Cancel")
+                }
+            }
+        )
+    }
+    // Exibe o AlertDialog AtividadeDialog
+    if (showDialog) {
+        ActivityDialog(
+            onDismiss = { showDialog = false },
+            onConfirm = { showDialog = false },
+            action = "Edit"
+        )
+    }
+
 }
+
 
 
 @Preview(showBackground = true)
