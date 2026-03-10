@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -26,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -55,6 +57,9 @@ fun HomeScreen(
     navController: NavController
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var showDialogDelete by remember { mutableStateOf(false) }
+    var idActivityToDelete by remember { mutableStateOf("") }
+
     var activities = remember { mutableStateListOf<Activity>() }
 
     val database = Firebase
@@ -187,7 +192,11 @@ fun HomeScreen(
                             )
                         }
                         IconButton(
-                            onClick = {}
+                            onClick = {
+                                showDialogDelete = true
+                                idActivityToDelete = it.id
+
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
@@ -202,19 +211,48 @@ fun HomeScreen(
         }
     }
 
-    if(showDialog) {
-        ActivityDialog(
-            onDismiss = {
-                showDialog = false
+    if (showDialogDelete){
+        AlertDialog(
+            onDismissRequest = { showDialogDelete = false },
+            title = {
+                Text(
+                    text = "Delete Activity"
+                )
             },
-            onConfirm = {
-                showDialog = false
+            text = {
+                Text(
+                    text = "Are you sure you want to delete this activity?"
+                )
             },
-            action = "New Activity"
+            confirmButton = {
+                TextButton (onClick = {
+                    showDialogDelete = false
+                    database.getReference("activities")
+                        .child(idActivityToDelete)
+                        .removeValue()
+                }) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDialogDelete = false
+                }) {
+                    Text(text = "Cancel")
+                }
+            }
         )
     }
-
+    // Exibe o AlertDialog AtividadeDialog
+    if (showDialog) {
+        ActivityDialog(
+            onDismiss = { showDialog = false },
+            onConfirm = { showDialog = false },
+            action = "Add"
+        )
+    }
 }
+
 
 @Preview(showBackground = true)
 @Composable
