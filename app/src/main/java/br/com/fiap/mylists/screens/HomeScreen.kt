@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -38,14 +39,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import br.com.fiap.mylists.ui.theme.MylistsTheme
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import br.com.fiap.mylists.R
 import br.com.fiap.mylists.model.Activity
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -59,6 +64,16 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
+
+    val loggedUser = FirebaseAuth.getInstance()
+
+
+    val context = LocalContext.current
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken(context.getString(R.string.default_web_client_id))
+        .requestEmail()
+        .build()
+
     var showDialog by remember { mutableStateOf(false) }
     var showDialogDelete by remember { mutableStateOf(false) }
     var showDialogEdit by remember { mutableStateOf(false) }
@@ -105,6 +120,11 @@ fun HomeScreen(
                         Text(
                             text = "My Lists",
                             color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Text(
+                            text = loggedUser.currentUser?.email ?: "",
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            fontSize = 14.sp
                         )
                         IconButton(
                             onClick = {
