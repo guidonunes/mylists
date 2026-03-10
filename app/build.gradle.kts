@@ -61,4 +61,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation("androidx.navigation:navigation-compose:2.9.7")
+
+    implementation("com.google.firebase:firebase-auth-ktx:24.0.1")
+    implementation("com.google.android.gms:play-services-auth:22.0.0")
+
+
 }
