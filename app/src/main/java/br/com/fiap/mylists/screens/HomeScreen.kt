@@ -59,8 +59,8 @@ fun HomeScreen(
                         )
                         IconButton(
                             onClick = {
-                                val autentica = FirebaseAuth.getInstance()
-                                autentica.signOut()
+                                val authenticate = FirebaseAuth.getInstance()
+                                authenticate.signOut()
                                 navController.navigate("login")
                             }
                         ) {
