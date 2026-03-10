@@ -91,22 +91,34 @@ fun ActivityDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val newActivity = Activity(
-                        title = title,
-                        subject = subject,
-                        deadline = deadline,
-                        done = done,
-                    )
 
                     val database = Firebase
                         .database("https://mylists-fiap-default-rtdb.firebaseio.com/")
-                    val reference = database.getReference("activities").push()
 
-                    newActivity.id = reference.key.toString()
+                    if(action == "Add") {
+                        val newActivity = Activity(
+                            title = title,
+                            subject = subject,
+                            deadline = deadline,
+                            done = done,
+                        )
+                        val reference = database.getReference("activities").push()
 
-                    reference.setValue(newActivity.toJson())
-
-                    onConfirm()
+                        newActivity.id = reference.key.toString()
+                        reference.setValue(newActivity.toJson())
+                        onConfirm()
+                    } else {
+                        val newActivity = activity.copy(
+                            title = title,
+                            subject = subject,
+                            deadline = deadline,
+                            done = done,
+                        )
+                        database.getReference("activities")
+                            .child(activity.id)
+                            .setValue(newActivity.toJson())
+                        onConfirm()
+                    }
                 }
             ) {
                 Text(text = "Confirm")

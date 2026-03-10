@@ -1,7 +1,6 @@
 package br.com.fiap.mylists.screens
 
-
-
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +48,9 @@ import androidx.navigation.compose.rememberNavController
 import br.com.fiap.mylists.model.Activity
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,29 +61,37 @@ fun HomeScreen(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showDialogDelete by remember { mutableStateOf(false) }
+    var showDialogEdit by remember { mutableStateOf(false) }
+    var idActivityToEdit by remember { mutableStateOf(Activity()) }
     var idActivityToDelete by remember { mutableStateOf("") }
 
-    var showDialogEdit by remember { mutableStateOf(false) }
-    var idActivityToEdit by remember { mutableStateOf("") }
-
-    var activities = remember { mutableStateListOf<Activity>() }
+    val activities = remember { mutableStateListOf<Activity>() }
 
     val database = Firebase
         .database("https://mylists-fiap-default-rtdb.firebaseio.com/")
 
-    database.getReference("activities")
-        .get().addOnSuccessListener { dataSnapshot ->
-            activities.clear()
-            for (child in dataSnapshot.children) {
-                val activity = child.getValue(Activity::class.java)
-                activities.add(activity!!)
-            }
-        }
-        .addOnFailureListener {
-            println("Failed to read value: ${it.message}")
-        }
+    LaunchedEffect(Unit) {
+        database.getReference("activities")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    activities.clear()
+                    for (child in snapshot.children) {
+                        try {
+                            val activity = child.getValue(Activity::class.java)
+                            if (activity != null) {
+                                activities.add(activity)
+                            }
+                        } catch (e: Exception) {
+                            Log.e("Firebase", "Failed to convert child to Activity", e)
+                        }
+                    }
+                }
 
-
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("Firebase", "Database error: ${error.message}")
+                }
+            })
+    }
 
     Scaffold(
         topBar = {
@@ -188,7 +199,7 @@ fun HomeScreen(
                         IconButton(
                             onClick = {
                                 showDialogEdit = true
-                                idActivityToEdit = it.id
+                                idActivityToEdit = it
                             }
                         ) {
                             Icon(
@@ -258,47 +269,14 @@ fun HomeScreen(
         )
     }
 
-    if (showDialogEdit){
-        AlertDialog(
-            onDismissRequest = { showDialogEdit = false },
-            title = {
-                Text(
-                    text = "Edit activity"
-                )
-            },
-            text = {
-                Text(
-                    text = "Are you sure you want to update this activity?"
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDialogEdit = false
-                    database.getReference("activities")
-                        .child(idActivityToEdit)
-                        .removeValue()
-                }) {
-                    Text(text = "Confirm")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showDialogEdit = false
-                }) {
-                    Text(text = "Cancel")
-                }
-            }
-        )
-    }
-    // Exibe o AlertDialog AtividadeDialog
-    if (showDialog) {
+    if (showDialogEdit) {
         ActivityDialog(
-            onDismiss = { showDialog = false },
-            onConfirm = { showDialog = false },
-            action = "Edit"
+            onDismiss = { showDialogEdit = false },
+            onConfirm = { showDialogEdit = false },
+            action = "Edit",
+            activity = idActivityToEdit
         )
     }
-
 }
 
 
